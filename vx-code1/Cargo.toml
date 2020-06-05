@@ -1,0 +1,20 @@
+[package]
+name = "vx-code"
+version = "0.1.0"
+authors = ["kflange <zknsftk1msrk@gmail.com>"]
+edition = "2018"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1"
+env_logger = "*"
+log = "*"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+termion = "1"
+
+[dependencies.clap]
+features = ["suggestions", "color", "wrap_help"]
+version = "2"
