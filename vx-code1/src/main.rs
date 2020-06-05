@@ -2,7 +2,8 @@ use std::cell::RefCell;
 use std::env;
 // use std::fs::File;
 // use std::io::{stdin, stdout, Write};
-// use std::process::exit;
+use std::io::stdin;
+use std::process::exit;
 use std::rc::Rc;
 use std::thread;
 
@@ -30,6 +31,10 @@ use event_controller::style::Styles;
 use event_controller::window::TermionLayout;
 use event_controller::EventController;
 
+mod input_controller;
+use input_controller::keyboard::TermionKeyboard;
+use input_controller::{Config, InputController};
+
 fn main() -> Result<()> {
     env::set_var("RUST_LOG", "debug");
     logger::init();
@@ -39,7 +44,8 @@ fn main() -> Result<()> {
         .version(crate_version!())
         .about(crate_description!())
         .arg(Arg::with_name("file").help("The file to open"));
-    let file_path = app.get_matches().value_of("file");
+    let matches = app.get_matches();
+    let file_path = matches.value_of("file");
 
     let (client_to_core_writer, core_to_client_reader, client_to_client_writer) =
         xi::run_xi();
@@ -58,29 +64,30 @@ fn main() -> Result<()> {
             .unwrap();
     });
 
-    // let mut input_controller = InputController::new(
-    //     Box::new(TermionKeyboard::from_reader(stdin())),
-    //     client_to_client_writer,
-    //     // &config,
-    // );
+    let config = Config::default();
+    let mut input_controller = InputController::new(
+        Box::new(TermionKeyboard::from_reader(stdin())),
+        client_to_client_writer,
+        &config,
+    );
 
-    // match file_path {
-    //     Some(file_path) => {
-    //         if let Err(err) = input_controller.open_file(&raw_peer, file_path) {
-    //             eprintln!("failed to open {}: {}", file_path, err);
-    //             exit(1);
-    //         }
-    //     }
-    //     None => {
-    //         eprintln!("failed to open the file. need fail path.");
-    //         exit(1);
-    //     }
-    // }
+    match file_path {
+        Some(file_path) => {
+            if let Err(err) = input_controller.open_file(&raw_peer, file_path) {
+                eprintln!("failed to open {}: {}", file_path, err);
+                exit(1);
+            }
+        }
+        None => {
+            eprintln!("failed to open the file. need fail path.");
+            exit(1);
+        }
+    }
 
-    // if let Err(err) = input_controller.start_keyboard_event_loop(&raw_peer) {
-    //     eprintln!("an error occured: {}", err);
-    //     exit(1);
-    // }
+    if let Err(err) = input_controller.start_keyboard_event_loop(&raw_peer) {
+        eprintln!("an error occured: {}", err);
+        exit(1);
+    }
 
     child.join().unwrap();
 
