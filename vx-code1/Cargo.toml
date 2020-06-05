@@ -18,3 +18,17 @@ termion = "1"
 [dependencies.clap]
 features = ["suggestions", "color", "wrap_help"]
 version = "2"
+
+[dependencies.xi-core-lib]
+branch = "master"
+git = "https://github.com/xi-editor/xi-editor"
+
+[dependencies.xi-rpc]
+branch = "master"
+git = "https://github.com/xi-editor/xi-editor"
+
+[dependencies.xi-trace]
+branch = "master"
+git = "https://github.com/xi-editor/xi-editor"
+features = ["chrome_trace_event"]
+optional = true
