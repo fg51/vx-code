@@ -12,27 +12,35 @@ use xi_core_lib::XiCore;
 use xi_rpc::RpcLoop;
 
 // pub fn start_xi_core() -> (Writer, Reader, ClientToClientWriter) {
+// NOTE:
+// thread.spawn(writer_from_xi_to_client.mainloop(reader_from_client_to_xi))
+// return (writer_from_client_to_xi, reader_from_xi_to_client)
 pub fn start_xi_core() -> (Writer, Reader) {
-    let mut core = XiCore::new();
+    let mut xi = XiCore::new();
 
-    let (to_core_tx, to_core_rx) = channel();
-    let client_to_core_writer = Writer(to_core_tx);
-    let client_to_core_reader = Reader(to_core_rx);
-
-    let (from_core_tx, from_core_rx) = channel();
-    let core_to_client_writer = Writer(from_core_tx.clone());
-    let core_to_client_reader = Reader(from_core_rx);
+    let (writer_from_client_to_xi, reader_from_client_to_xi) = make_channel();
+    let (writer_from_xi_to_client, reader_from_xi_to_client) = make_channel();
 
     // let client_to_client_writer = ClientToClientWriter(Writer(from_core_tx));
 
-    let mut core_event_loop = RpcLoop::new(core_to_client_writer);
-    thread::spawn(move || core_event_loop.mainloop(|| client_to_core_reader, &mut core));
+    //pub fn mainloop<R, RF, H>(&mut self, rf: RF, handler: &mut H) -> Result<(), ReadError>
+    //where
+    //    R: BufRead,
+    //    RF: Send + FnOnce() -> R,
+    //    H: Handler,
+    let mut xi_event_loop = RpcLoop::new(writer_from_xi_to_client);
+    thread::spawn(move || xi_event_loop.mainloop(|| reader_from_client_to_xi, &mut xi));
 
     (
-        client_to_core_writer,
-        core_to_client_reader,
+        writer_from_client_to_xi,
+        reader_from_xi_to_client,
         //    client_to_client_writer,
     )
+}
+
+fn make_channel() -> (Writer, Reader) {
+    let (tx, rx) = channel();
+    (Writer(tx), Reader(rx))
 }
 
 pub struct Writer(Sender<String>);

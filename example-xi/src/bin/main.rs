@@ -15,7 +15,10 @@ const XI_LOG_DIR: &str = "xi-core";
 const XI_LOG_FILE: &str = "xi-core.log";
 
 fn main() {
-    run();
+    if let Err(e) = lib::run() {
+        eprintln!("{:?}", e);
+        process::exit(1);
+    }
     //let mut state = XiCore::new();
     //let stdin = io::stdin();
     //let stdout = io::stdout();
