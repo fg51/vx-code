@@ -19,10 +19,13 @@ thiserror = "1"
 [dependencies.xi-core-lib]
 branch = "master"
 git = "https://github.com/xi-editor/xi-editor"
+# [dependencies.xi-core-lib]
+# path = "xi-editor/rust/core-lib"
 
 [dependencies.xi-rpc]
 branch = "master"
 git = "https://github.com/xi-editor/xi-editor"
+# path = "xi-editor/rust/rpc"
 
 [dependencies.xi-trace]
 branch = "master"

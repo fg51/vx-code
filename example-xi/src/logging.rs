@@ -5,15 +5,16 @@ use std::{fs, io};
 use log::info;
 
 pub fn setup(logging_path: &Path) -> Result<(), fern::InitError> {
-    let level_filter = match std::env::var("XI_LOG") {
-        Ok(level) => match level.to_lowercase().as_ref() {
-            "trace" => log::LevelFilter::Trace,
-            "debug" => log::LevelFilter::Debug,
-            _ => log::LevelFilter::Info,
-        },
-        // Default to info
-        Err(_) => log::LevelFilter::Info,
-    };
+    // let level_filter = match std::env::var("XI_LOG") {
+    //     Ok(level) => match level.to_lowercase().as_ref() {
+    //         "trace" => log::LevelFilter::Trace,
+    //         "debug" => log::LevelFilter::Debug,
+    //         _ => log::LevelFilter::Info,
+    //     },
+    //     // Default to info
+    //     Err(_) => log::LevelFilter::Info,
+    // };
+    let level_filter = log::LevelFilter::Debug;
 
     create_log_directory(logging_path)?;
 

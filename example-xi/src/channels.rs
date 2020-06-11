@@ -9,7 +9,7 @@ use std::thread;
 
 use xi_core_lib::XiCore;
 // use xi_rpc::{Peer, RpcLoop};
-use xi_rpc::RpcLoop;
+use xi_rpc::{Handler, RpcLoop};
 
 // pub fn start_xi_core() -> (Writer, Reader, ClientToClientWriter) {
 // NOTE:
@@ -18,7 +18,7 @@ use xi_rpc::RpcLoop;
 pub fn start_xi_core() -> (Writer, Reader) {
     let mut xi = XiCore::new();
 
-    let (writer_from_client_to_xi, reader_from_client_to_xi) = make_channel();
+    let (from_client_to_xi_tx, from_client_to_xi_rx) = make_channel();
     let (writer_from_xi_to_client, reader_from_xi_to_client) = make_channel();
 
     // let client_to_client_writer = ClientToClientWriter(Writer(from_core_tx));
@@ -29,10 +29,10 @@ pub fn start_xi_core() -> (Writer, Reader) {
     //    RF: Send + FnOnce() -> R,
     //    H: Handler,
     let mut xi_event_loop = RpcLoop::new(writer_from_xi_to_client);
-    thread::spawn(move || xi_event_loop.mainloop(|| reader_from_client_to_xi, &mut xi));
+    thread::spawn(move || xi_event_loop.mainloop(|| from_client_to_xi_rx, &mut xi));
 
     (
-        writer_from_client_to_xi,
+        from_client_to_xi_tx,
         reader_from_xi_to_client,
         //    client_to_client_writer,
     )
