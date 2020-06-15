@@ -13,8 +13,22 @@ async fn main() -> std::io::Result<()> {
     //let result = stream.write(b"hello async\n").await;
     //println!("wrote to stream; success={:?}", result.is_ok());
 
-    let hello = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
+    // let hello = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
+    let hello = hello().and(name()).and_then(greet_handler);
     warp::serve(hello).run(([127, 0, 0, 1], 8080)).await;
 
     Ok(())
+}
+
+fn hello() -> warp::filters::BoxedFilter<()> {
+    warp::path("hello").boxed()
+}
+
+fn name() -> warp::filters::BoxedFilter<(String,)> {
+    warp::path::param().boxed()
+}
+
+async fn greet_handler(name: String) -> Result<impl warp::Reply, warp::Rejection> {
+    let reply = format!("hello {}", name);
+    Ok(warp::reply::html(reply))
 }
